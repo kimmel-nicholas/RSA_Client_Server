@@ -3,19 +3,14 @@
 # Receives the client's message and replies to it and closes the connection
 # Continues listening
 # Use Python 3 to run
-import Crypto
 import socket
-from Crypto.PublicKey import RSA
-
-global private_Key
-global public_Key
+import rsa
 
 
-def generateKey():
-    global private_Key
-    private_Key = RSA.generate(2048)
-    return private_Key
+global public_Key, private_Key
 
+#create rsa public and private keys
+public_Key, private_Key = rsa.newkeys(512)
 
 # create a socket object that will listen
 serverSocket = socket.socket(
@@ -42,18 +37,26 @@ while True:
     # addr_port is a tuple that contains both the address and the port number
     print("Got a connection from " + str(addr_port))
 
-    # Receive  the message from the client (receive no more than 1024 bytes)
-    receivedBytes = clientSocket.recv(1024)
-    # Decode the bytes into a string (Do this only for strings, not keys)
-    receivedMessage = bytes.decode(receivedBytes)
-    # Print the message
-    print("From client: ", receivedMessage)
 
-    # This message will be sent to the client
-    message = "Hello! I'm the server."
-    # Encode the message into bytes
-    messageBytes = message.encode()
-    # Send the bytes through the client socket
-    clientSocket.send(messageBytes)
-    # close the client socket (but NOT the socket that is listening)
-    clientSocket.close()
+    #Send public key n
+    n = public_Key.n
+    print("sending n..")
+    n = str(n)
+    n = n.encode()
+    clientSocket.send(n)
+
+    ok = clientSocket.recv(1024)
+
+    #send Public key e
+    e = public_Key.e
+    print("sending e..")
+    e = str(e)
+    e = e.encode()
+    clientSocket.send(e)
+
+
+    receivedBytes = clientSocket.recv(1024)
+    #message = receivedBytes.decode(encoding='unicode_escape')
+    print("Decrypted message from client: ", rsa.decrypt(receivedBytes, private_Key).decode())
+
+
