@@ -47,7 +47,6 @@ connectionSocket.send(messageLength)
 while True:
     try:
         to_Send = rsa.encrypt(user_Input, server_PublicKey)
-        #print(len(to_Send))
         connectionSocket.send(to_Send)
         break
     except OverflowError:                                           #when a message is too long to be encrypted, an OverflowError is thrown
