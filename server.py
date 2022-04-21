@@ -3,9 +3,8 @@
 # Receives the client's message and replies to it and closes the connection
 # Continues listening
 # Use Python 3 to run
-import socket
-from time import sleep
 
+import socket
 import rsa
 
 
@@ -19,8 +18,8 @@ serverSocket = socket.socket(
     socket.AF_INET, socket.SOCK_STREAM)
 # get local machine name
 host = socket.gethostname()
-# the socket will isten at port 7777
-port = 7778
+# the socket will listen at port 7777
+port = 7777
 
 # bind the socket to the port
 serverSocket.bind((host, port))
@@ -41,10 +40,8 @@ while True:
 
 
     #Send public key n
-    print(type(public_Key))
     print(public_Key)
     n = public_Key.n
-    print(type(n))
     print("sending n..")
     n = str(n)
     n = n.encode()
@@ -59,29 +56,17 @@ while True:
     e = e.encode()
     clientSocket.send(e)
 
+    #get length of message - to handle long messages
     receivedBytes = clientSocket.recv(1024)
     messageLength = int(rsa.decrypt(receivedBytes, private_Key).decode())
-    #receivedBytes = clientSocket.recv(1024)
-
-    #print(messageLength)
-
 
     amountReceived = 0
     print("Decrypted message from client: ")
     while amountReceived < messageLength:
-        #print(messageLength)
-        #print(amountReceived)
-        #if amountReceived < messageLength:
         receivedBytes = clientSocket.recv(1024)
         mes = len(receivedBytes)
-        #print(mes)
-        #amountReceived += len(receivedBytes)*8
         amountReceived += 52*8
         print(rsa.decrypt(receivedBytes, private_Key).decode())
-        #sleep(1)
-        #break
 
-    #message = receivedBytes.decode(encoding='unicode_escape')
-    #print("Decrypted message from client: ", rsa.decrypt(receivedBytes, private_Key).decode())
-
-
+    #Final message to client
+    clientSocket.send("MESSAGE RECEIVED. Goodbye".encode())
